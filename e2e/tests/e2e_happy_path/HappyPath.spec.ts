@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
+import * as fs from 'fs';
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
@@ -112,6 +112,7 @@ suite('Language server validation', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
 
+        await ide.checkLsInitializationStart('Starting Java Language Server');
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
         await ide.waitStatusBarTextAbsence('Building workspace', 360000);
@@ -121,7 +122,18 @@ suite('Language server validation', async () => {
         await editor.type(javaFileName, 'textForErrorHighlighting', 30);
         await editor.waitErrorInLine(30);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, 'z'));
+        try{
         await editor.waitErrorInLineDisappearance(30);
+    }
+    catch(error){
+        const editorContent: string = 'editorContent.txt';
+        const editorText: string = await editor.getEditorVisibleText(javaFileName);
+        const reportDirPath: string = './report';
+        fs.mkdirSync(reportDirPath);
+        const browserLogsStream = fs.createWriteStream(editorContent);
+        browserLogsStream.write(new Buffer(editorText));
+        browserLogsStream.end();
+    }
     });
 
     test('Autocomplete', async () => {
