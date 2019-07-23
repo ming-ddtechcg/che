@@ -124,6 +124,7 @@ suite('Language server validation', async () => {
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, 'z'));
         try{
         await editor.waitErrorInLineDisappearance(30);
+        new Error('test error');
     }
     catch(error){
         const editorContent: string = 'editorContent.txt';
