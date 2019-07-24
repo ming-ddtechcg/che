@@ -112,30 +112,29 @@ suite('Language server validation', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
 
-        await ide.checkLsInitializationStart('Starting Java Language Server');
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
         await ide.waitStatusBarTextAbsence('Building workspace', 360000);
     });
 
     test('Error highlighting', async () => {
-        await editor.type(javaFileName, 'textForErrorHighlighting', 30);
+        await editor.type(javaFileName, 'error', 30);
         await editor.waitErrorInLine(30);
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, 'z'));
-        try{
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        try {
         await editor.waitErrorInLineDisappearance(30);
-        new Error('test error');
+        } catch (error) {
+            const editorContent: string = 'editorContent.txt';
+            const editorText: string = await editor.getEditorVisibleText(javaFileName);
+            const reportDirPath: string = './report';
+            fs.mkdirSync(reportDirPath);
+            const browserLogsStream = fs.createWriteStream(editorContent);
+            browserLogsStream.write(new Buffer(editorText));
+            browserLogsStream.end();
+        }
     }
-    catch(error){
-        const editorContent: string = 'editorContent.txt';
-        const editorText: string = await editor.getEditorVisibleText(javaFileName);
-        const reportDirPath: string = './report';
-        fs.mkdirSync(reportDirPath);
-        const browserLogsStream = fs.createWriteStream(editorContent);
-        browserLogsStream.write(new Buffer(editorText));
-        browserLogsStream.end();
-    }
-    });
+
+    );
 
     test('Autocomplete', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
