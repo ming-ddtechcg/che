@@ -123,14 +123,15 @@ suite('Language server validation', async () => {
         await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         try {
         await editor.waitErrorInLineDisappearance(30);
-        } catch (error) {
+        } catch (e) {
+            await console.log(" >>>>>> in the catch block")
             const editorContent: string = 'editorContent.txt';
             const editorText: string = await editor.getEditorVisibleText(javaFileName);
             const reportDirPath: string = './report';
-            fs.mkdirSync(reportDirPath);
+            await fs.mkdirSync(reportDirPath);
             const browserLogsStream = fs.createWriteStream(editorContent);
-            browserLogsStream.write(new Buffer(editorText));
-            browserLogsStream.end();
+            await browserLogsStream.write(new Buffer(editorText));
+            await browserLogsStream.end();
         }
     }
 
